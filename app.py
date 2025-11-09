@@ -27,6 +27,9 @@ db_models.create_tables()
 # Global cache for trained models
 model_cache = {}
 
+# Global cache for product search results (DataFrames)
+product_cache = {}
+
 # --- Smart Category Filtering (Feature 5) ---
 def categorize_product(name):
     """Simple heuristic to categorize a product."""
@@ -169,8 +172,9 @@ def api_search():
     model, tokenizer, max_length = train_dl_model(df)
     model_cache[query] = (model, tokenizer, max_length)
     
-    # Store dataframe for later
-    session['df_json'] = df.to_json(orient='split')
+# Store dataframe for later in our new server-side cache
+    # We use the user's ID as the key
+    product_cache[session['user_id']] = df
     
     print(f"Search complete. Found {len(df)} items.")
     return jsonify({
@@ -191,7 +195,8 @@ def api_recommend():
     db_models.log_click(session["user_id"], product_name)
     
     try:
-        df = pd.read_json(session['df_json'], orient='split')
+        # Read the DataFrame from our new server-side cache
+        df = product_cache[session['user_id']]
     except KeyError:
         return jsonify({"error": "No search data found. Please search first."}), 400
         
