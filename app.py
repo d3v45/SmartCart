@@ -30,6 +30,10 @@ model_cache = {}
 # Global cache for product search results (DataFrames)
 product_cache = {}
 
+# Global cache for entire search results (DataFrame + Filters)
+# This will be keyed by the search query (e.g., "shoe")
+global_search_cache = {}
+
 # --- Smart Category Filtering (Feature 5) ---
 def categorize_product(name):
     """Simple heuristic to categorize a product."""
@@ -127,8 +131,28 @@ def api_search():
     if not query:
         return jsonify({"error": "No query provided"}), 400
     
-    print(f"User {session['user_id']} starting SYNCHRONOUS search for: {query}")
     session['last_query'] = query
+
+    # --- NEW: CHECK GLOBAL CACHE FIRST ---
+    if query in global_search_cache:
+        print(f"User {session['user_id']} got CACHE HIT for query: {query}")
+        
+        # Retrieve the cached DataFrame and filter options
+        df, filter_options = global_search_cache[query]
+        
+        # VERY IMPORTANT: We must still update the *user's* cache
+        # so the /api/recommend route knows what data to use.
+        product_cache[session['user_id']] = df
+        
+        # Return the cached data immediately
+        return jsonify({
+            "products": df.to_dict(orient='records'),
+            "filters": filter_options,
+            "message": f"Found {len(df)} unique products (from cache)."
+        })
+    # --- END OF CACHE CHECK ---
+    
+    print(f"User {session['user_id']} got CACHE MISS. Starting SYNCHRONOUS search for: {query}")
 
     # --- THIS IS THE SLOW PART ---
     # The server will "freeze" here until they are all done
@@ -175,6 +199,12 @@ def api_search():
 # Store dataframe for later in our new server-side cache
     # We use the user's ID as the key
     product_cache[session['user_id']] = df
+    
+    # --- NEW: SAVE TO GLOBAL CACHE ---
+    # Save the results for *all* users to re-use
+    print(f"Saving new search to global cache: {query}")
+    global_search_cache[query] = (df, filter_options)
+    # ---------------------------------
     
     print(f"Search complete. Found {len(df)} items.")
     return jsonify({
