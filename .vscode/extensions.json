@@ -1,0 +1,8 @@
+{
+    // Recommended extensions for this workspace. After adding this file,
+    // VS Code will show an extension recommendation banner.
+    "recommendations": [
+        "bradlc.vscode-tailwindcss"
+    ],
+    "unwantedRecommendations": []
+}

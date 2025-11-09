@@ -1,0 +1,17 @@
+# Flask & Web Server
+Flask
+Flask-Session
+pandas
+numpy
+
+# --- NEW: Asynchronous Tasks ---
+celery
+redis
+
+# --- Your Existing Libs ---
+tensorflow
+scikit-learn
+selenium
+webdriver-manager
+beautifulsoup4
+requests

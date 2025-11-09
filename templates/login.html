@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block title %}{% if is_login %}Login{% else %}Sign Up{% endif %} - SmartCart{% endblock %}
+
+{% block content %}
+<div class="min-h-full flex">
+    <!-- Left Column (Branding) -->
+    <div class="hidden lg:flex lg:flex-1 bg-gradient-to-br from-red-600 to-pink-600 text-white p-12 flex-col justify-between">
+        <div>
+            <h1 class="text-4xl font-bold">🛍️ SmartCart AI</h1>
+            <p class="mt-4 text-xl text-red-100">Your Personal Shopping AI.</p>
+        </div>
+        <div class="mt-auto">
+            <p class="text-lg font-semibold">Welcome to the future of shopping.</p>
+            <p class="mt-2 text-red-200">
+                Search across all your favorite stores, find the best prices, and get AI-powered recommendations based on your unique style.
+            </p>
+        </div>
+    </div>
+
+    <!-- Right Column (Form) -->
+    <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div class="mx-auto w-full max-w-sm lg:w-96">
+            <div>
+                <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+                    {% if is_login %}Sign in to your account{% else %}Create a new account{% endif %}
+                </h2>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 dark:border-gray-700 mt-8 mb-6">
+                <a href="{{ url_for('login') }}" class="flex-1 py-3 font-semibold text-center border-b-2 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 {% if is_login %}border-red-500 text-red-600 dark:text-red-500{% endif %}">
+                    Login
+                </a>
+                <a href="{{ url_for('signup') }}" class="flex-1 py-3 font-semibold text-center border-b-2 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 {% if not is_login %}border-red-500 text-red-600 dark:text-red-500{% endif %}">
+                    Sign Up
+                </a>
+            </div>
+            
+            <!-- Error Message -->
+            {% if error %}
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-6" role="alert">
+                <p class="font-bold">Error</p>
+                <p>{{ error }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Form -->
+            <form class="space-y-6" action="{% if is_login %}{{ url_for('login') }}{% else %}{{ url_for('signup') }}{% endif %}" method="POST">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+                    <div class="mt-1">
+                        <input id="username" name="username" type="text" required class="relative block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 px-3 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:z-10 focus:border-red-500 dark:focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm" placeholder="your_username">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                    <div class="mt-1">
+                        <input id="password" name="password" type="password" required class="relative block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 px-3 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:z-10 focus:border-red-500 dark:focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm" placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="flex justify-center rounded-md border border-transparent bg-red-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:ring-offset-gray-800 w-full">
+                        {% if is_login %}Sign In{% else %}Create Account{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

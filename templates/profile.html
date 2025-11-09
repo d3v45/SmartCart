@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+{% block title %}My Profile - SmartCart{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col">
+    <!-- Header (simplified for profile page) -->
+    <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-30 border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <a href="{{ url_for('index') }}" class="flex-shrink-0 flex items-center text-2xl font-bold text-red-600">
+                    🛍️ SmartCart
+                </a>
+                
+                <!-- User Info & Actions -->
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('index') }}" title="Back to Search" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <i class="ph ph-magnifying-glass text-xl"></i>
+                    </a>
+                    <button id="theme-toggle" title="Toggle theme" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <!-- Icon injected by JS -->
+                    </button>
+                    <a href="{{ url_for('logout') }}" title="Logout" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <i class="ph ph-sign-out text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-8">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-3xl font-bold mb-8">My Profile</h1>
+            <p class="text-xl mb-8 text-gray-600 dark:text-gray-300">Welcome, <span class="font-semibold text-red-600">{{ username }}</span>!</p>
+
+            <!-- Wishlist Section (Feature 2) -->
+            <section id="wishlist" class="mb-12">
+                <h2 class="text-2xl font-bold mb-4">My Wishlist</h2>
+                {% if wishlist %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for item in wishlist %}
+                        <div class="product-card">
+                            <span class="product-store">{{ item.store }}</span>
+                            <img src="{{ item.image_url }}" alt="{{ item.product_name }}" class="product-image" onerror="this.src='https://placehold.co/400x400/e0e0e0/909090?text=Image+Not+Found'">
+                            <div class="product-info">
+                                <h3 class="product-name" title="{{ item.product_name }}">{{ item.product_name }}</h3>
+                                <p class="product-price">₹{{ item.price|int }}</p>
+                            </div>
+                            <div class="space-y-2 mt-2">
+                                <a href="{{ item.product_url }}" target="_blank" class="btn-secondary">
+                                    View on Site
+                                </a>
+                                <button class="remove-wishlist-btn btn-secondary w-full !bg-red-100 !text-red-700 dark:!bg-red-900/50 dark:!text-red-300" data-url="{{ item.product_url }}">
+                                    <i class="ph ph-trash"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="placeholder-card !col-span-1">
+                        <i class="ph ph-heart text-4xl text-gray-400 mb-3"></i>
+                        <p>Your wishlist is empty. Add items from the search page!</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- Price Tracking Section (Feature 3) -->
+            <section id="tracking" class="mb-12">
+                <h2 class="text-2xl font-bold mb-4">Tracked Items</h2>
+                {% if tracked_items %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                        <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for item in tracked_items %}
+                            <li class="p-4 flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium truncate">{{ item.product_url.split('/')[-1] }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Tracking from: {{ item.store }}</p>
+                                </div>
+                                <span class="text-sm font-semibold">Alert below ₹{{ item.desired_price|int }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Note: Background price checking is not yet enabled. This is a prototype.</p>
+                {% else %}
+                    <div class="placeholder-card !col-span-1">
+                        <i class="ph ph-tag text-4xl text-gray-400 mb-3"></i>
+                        <p>You aren't tracking any items yet. Click "Track Price" on a product!</p>
+                    </div>
+                {% endif %}
+            </section>
+            
+            <!-- Click History Section -->
+            <section id="history" class="mb-12">
+                <h2 class="text-2xl font-bold mb-4">My Recent History</h2>
+                {% if click_history %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                        <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for click in click_history %}
+                            <li class="p-4 flex items-center justify-between">
+                                <p class="text-sm font-medium truncate" title="{{ click.product_name }}">{{ click.product_name }}</p>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ click.timestamp.split('.')[0] }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="placeholder-card !col-span-1">
+                        <i class="ph ph-mouse-click text-4xl text-gray-400 mb-3"></i>
+                        <p>Your click history is empty.</p>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- Add component styles inline -->
+<style>
+    .form-input { @apply relative block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:z-10 focus:border-red-500 dark:focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm; }
+    .btn-secondary { @apply w-full text-center px-4 py-2 bg-red-50 dark:bg-gray-700 text-red-700 dark:text-red-300 text-sm font-medium rounded-md hover:bg-red-100 dark:hover:bg-gray-600; }
+    .product-card { @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 transition-all duration-200 ease-in-out flex flex-col h-full overflow-hidden shadow-sm; }
+    .product-image { @apply w-full h-56 object-contain rounded-md mb-4 bg-gray-50 dark:bg-gray-700; }
+    .product-info { @apply flex-grow flex flex-col; }
+    .product-name { @apply text-sm font-semibold text-gray-800 dark:text-gray-100 h-10 overflow-hidden mb-2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .product-price { @apply text-lg font-bold text-gray-900 dark:text-white mt-auto mb-3; }
+    .product-store { @apply text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full px-2.5 py-1 self-start mb-2; }
+    .placeholder-card { @apply text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm col-span-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 min-h-[150px]; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Handle remove from wishlist
+        document.querySelectorAll('.remove-wishlist-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const card = e.target.closest('.product-card');
+                const productUrl = e.currentTarget.dataset.url;
+                
+                if (confirm('Are you sure you want to remove this item from your wishlist?')) {
+                    try {
+                        const response = await fetch('/api/wishlist/remove', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ product_url: productUrl })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            card.remove(); // Remove the card from the page
+                        } else {
+                            alert('Failed to remove item.');
+                        }
+                    } catch (error) {
+                        alert('Error: ' + error.message);
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SmartCart{% endblock %}</title>
+    
+    <!-- 1. Load Tailwind CSS (Play CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. Load Inter font -->
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    
+    <!-- 3. Load Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- 4. Configure Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Enable dark mode
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Hide scrollbar for filter lists */
+        .filter-list::-webkit-scrollbar { display: none; }
+        .filter-list { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+    
+    <!-- 5. Dark Mode Logic -->
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <div id="app-container" class="h-full">
+        <!-- Global Loading Spinner -->
+        <div id="global-loader" class="fixed inset-0 bg-gray-900 bg-opacity-75 backdrop-filter backdrop-blur-sm flex flex-col items-center justify-center z-50 hidden">
+            <!-- Replaced .loader with Tailwind's animate-spin -->
+            <div class="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-white text-lg mt-4 font-semibold">Searching stores...</p>
+            <p class="text-gray-300 text-sm">This may take a moment.</p>
+        </div>
+        
+        <!-- Custom Message Box -->
+        <div id="message-box" class="fixed inset-0 bg-gray-900 bg-opacity-75 backdrop-filter backdrop-blur-sm flex flex-col items-center justify-center z-50 hidden">
+            <!-- Replaced .modal-content with Tailwind classes -->
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-2xl w-full max-w-md text-center">
+                <h3 id="message-box-title" class="text-xl font-semibold mb-2">Message</h3>
+                <p id="message-box-text" class="text-gray-600 dark:text-gray-300 mb-6"></p>
+                <!-- Replaced .btn-primary -->
+                <button id="message-box-ok" class="flex justify-center rounded-md border border-transparent bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:ring-offset-gray-800">
+                    OK
+                </button>
+            </div>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Dark Mode Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const isDark = document.documentElement.classList.toggle('dark');
+                    localStorage.theme = isDark ? 'dark' : 'light';
+                    // Update icon
+                    themeToggle.innerHTML = isDark 
+                        ? '<i class="ph ph-sun text-xl"></i>' 
+                        : '<i class="ph ph-moon text-xl"></i>';
+                });
+                
+                // Set initial icon
+                if (document.documentElement.classList.contains('dark')) {
+                    themeToggle.innerHTML = '<i class="ph ph-sun text-xl"></i>';
+                } else {
+                    themeToggle.innerHTML = '<i class="ph ph-moon text-xl"></i>';
+                }
+            }
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
