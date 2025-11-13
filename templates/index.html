@@ -71,7 +71,7 @@
 
                 <!-- Store Filter -->
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Store</label>
+                    <label class_name="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Store</label>
                     <div id="filter-store-list" class="filter-list max-h-40 overflow-y-auto space-y-2">
                         <!-- Stores populated by JS -->
                     </div>
@@ -79,7 +79,7 @@
 
                 <!-- Brand Filter -->
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brand</label>
+                    <label class_name="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brand</label>
                     <div id="filter-brand-list" class="filter-list max-h-48 overflow-y-auto space-y-2">
                         <!-- Brands populated by JS -->
                     </div>
@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSearchQuery = '';
     let currentMinPrice = 0;
     let currentMaxPrice = 100000;
+    let pollIntervalId = null; // Store interval ID to clear it
 
     // --- UI Element References ---
     const searchForm = document.getElementById('search-form');
@@ -173,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetFiltersBtn = document.getElementById('reset-filters');
     
     const globalLoader = document.getElementById('global-loader');
+    const loaderText = globalLoader.querySelector('p:first-of-type'); // Get loader text
     
     const messageBox = document.getElementById('message-box');
     const messageBoxTitle = document.getElementById('message-box-title');
@@ -180,7 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageBoxOk = document.getElementById('message-box-ok');
     
     // --- Utility Functions ---
-    const showLoader = (isLoading) => globalLoader.classList.toggle('hidden', !isLoading);
+    const showLoader = (isLoading, text = "Searching stores...") => {
+        loaderText.textContent = text;
+        globalLoader.classList.toggle('hidden', !isLoading);
+    };
     const showMessage = (title, text) => {
         messageBoxTitle.textContent = title;
         messageBoxText.textContent = text;
@@ -234,6 +239,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
 
+    // --- MODIFIED: Checks for the new grid loader and removes it ---
+    function appendProducts(gridElement, products) {
+        if (!products || products.length === 0) return;
+        
+        // Check if our new grid loader is present and remove it
+        const gridLoader = gridElement.querySelector('.grid-loader-container');
+        if (gridLoader) {
+            gridElement.innerHTML = ''; // Nuke the loader
+        }
+
+        products.forEach(product => gridElement.appendChild(createProductCard(product)));
+    }
+
+    // --- Renders a full list (e.g., for filters or cache hits) ---
     function renderProducts(gridElement, products, placeholderElement) {
         gridElement.innerHTML = '';
         if (!products || products.length === 0) {
@@ -253,6 +272,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Filter Functions ---
     function populateFilters(filters) {
+        if (!filters) {
+            console.warn("No filter data received.");
+            return;
+        }
+
         currentMinPrice = filters.minPrice;
         currentMaxPrice = filters.maxPrice;
         filterMinPrice.value = currentMinPrice;
@@ -282,9 +306,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <label for="brand-${brand}" class="ml-2 text-sm truncate" title="${brand}">${brand}</label>
             </div>
         `).join('');
+
+        filterSidebar.classList.remove('hidden');
     }
     
     function applyFilters() {
+        // ... (This function is unchanged)
         const minPrice = parseInt(filterMinPrice.value) || currentMinPrice;
         const maxPrice = parseInt(filterMaxPrice.value) || currentMaxPrice;
         
@@ -308,23 +335,121 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Handlers ---
 
-    // Handle Search (NOW SYNCHRONOUS)
+    // --- pollForResult (Unchanged from last version) ---
+    function pollForResult(taskId, query) {
+        if (pollIntervalId) {
+            clearInterval(pollIntervalId); // Clear any existing poll
+        }
+
+        let pollCount = 0;
+        const maxPolls = 30; // Stop after 1.5 minutes (30 * 3s)
+        
+        pollIntervalId = setInterval(async () => {
+            if (pollCount > maxPolls) {
+                clearInterval(pollIntervalId);
+                showMessage('Search Error', 'The search took too long and timed out.');
+                searchResultsCount.textContent = `Search timed out.`;
+                return;
+            }
+            pollCount++;
+            
+            try {
+                const response = await fetch(`/api/search-status/${taskId}`);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Search failed on the server.');
+                }
+                
+                const data = await response.json();
+                
+                // --- 1. Handle new products (if any) ---
+                if (data.new_products && data.new_products.length > 0) {
+                    console.log(`Received ${data.new_products.length} new products.`);
+                    appendProducts(searchResultsGrid, data.new_products);
+                    allProducts.push(...data.new_products);
+                    searchResultsCount.textContent = `${allProducts.length} products found so far...`;
+                }
+                
+                // --- 2. Check for final state ---
+                if (data.status === 'SUCCESS') {
+                    console.log('Search SUCCESS, all data received.');
+                    clearInterval(pollIntervalId);
+                    
+                    // Set final data
+                    allProducts = data.products;
+                    // Only re-render if no products were found (to clear "No valid products" error)
+                    if (allProducts.length === 0) {
+                         renderProducts(searchResultsGrid, [], null);
+                    } else {
+                        // Otherwise, just update filters and count
+                         populateFilters(data.filters);
+                         searchResultsCount.textContent = `${allProducts.length} products found.`;
+                    }
+                    recommendationsSection.classList.remove('hidden');
+
+                } else if (data.status === 'PROCESSING') {
+                    console.log('Search PROCESSING... training AI model.');
+                    searchResultsCount.textContent = `${allProducts.length} products found... Training AI model.`;
+
+                } else if (data.status === 'PENDING') {
+                    console.log('Search PENDING... more scrapers running.');
+                    // Keep the last "xx products found so far..." message
+                
+                } else {
+                    clearInterval(pollIntervalId);
+                    throw new Error(data.message || 'An unknown error occurred.');
+                }
+            } catch (error) {
+                clearInterval(pollIntervalId);
+                showMessage('Search Error', error.message);
+                searchResultsCount.textContent = `Search Error: ${error.message}`;
+            }
+        }, 3000); // Poll every 3 seconds
+    }
+    
+    // --- MODIFIED: Handle Search to add NEW animated loader ---
     searchForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const query = searchInput.value.trim();
         if (!query) return;
 
         currentSearchQuery = query;
-        showLoader(true); // Show the full-page loader
+        showLoader(true, "Dispatching scrapers..."); // Show loader *briefly*
         appMessage.classList.add('hidden');
-        filterSidebar.classList.add('hidden');
+        filterSidebar.classList.add('hidden'); // Hide until we have filters
+        
+        // Clear all old results
+        allProducts = [];
+        
+        // --- NEW: Inject Animated Loader ---
+        searchResultsGrid.innerHTML = `
+            <div class="grid-loader-container">
+                <div class="scanner-animation">
+                    <i class="ph ph-shopping-cart-simple text-6xl text-red-500"></i>
+                    <div class="scanner-line"></div>
+                    <div class="bar bar-1"></div>
+                    <div class="bar bar-2"></div>
+                    <div class="bar bar-3"></div>
+                    <div class="bar bar-4"></div>
+                    <div class="bar bar-5"></div>
+                </div>
+                <p class="text-lg font-medium text-gray-600 dark:text-gray-300 mt-4">
+                    Scanning stores for the best deals...
+                </p>
+            </div>
+        `;
+        // --- END NEW ---
+
+        searchResultsCount.textContent = 'Searching...';
+        searchResultsTitle.textContent = `Results for "${query}"`; // Set title immediately
+        searchResultsSection.classList.remove('hidden'); // Show the (empty) results section
         
         recommendationsSection.classList.add('hidden');
         renderProducts(aiRecsGrid, [], aiRecsPlaceholder);
         renderProducts(similarRecsGrid, [], similarRecsPlaceholder);
 
         try {
-            // This fetch is now VERY SLOW. It waits for the server to do all scraping.
             const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
             
             if (!response.ok) {
@@ -333,27 +458,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const data = await response.json();
-            allProducts = data.products; // Store all products
             
-            // Show sections
-            filterSidebar.classList.remove('hidden');
-            searchResultsSection.classList.remove('hidden');
-            searchResultsTitle.textContent = `Results for "${query}"`;
-            
-            // Populate filters and render initial products
-            populateFilters(data.filters);
-            renderProducts(searchResultsGrid, allProducts, null);
-            
-            recommendationsSection.classList.remove('hidden');
+            if (data.status === 'SUCCESS') {
+                // This was a CACHE HIT. Render immediately.
+                console.log('Cache hit!');
+                showLoader(false);
+                
+                allProducts = data.products;
+                renderProducts(searchResultsGrid, allProducts, null); // This clears loader
+                populateFilters(data.filters);
+                recommendationsSection.classList.remove('hidden');
+                searchResultsCount.textContent = `${allProducts.length} products found.`;
+                
+            } else if (data.status === 'PENDING') {
+                // This was a CACHE MISS. Start polling.
+                console.log('Cache miss, starting poll...');
+                showLoader(false); 
+                searchResultsCount.textContent = "Searching stores... 0 products found.";
+                pollForResult(data.task_id, query);
+            }
 
         } catch (error) {
             console.error('Search error:', error);
             showMessage('Search Error', error.message);
             appMessage.classList.remove('hidden');
-        } finally {
-            showLoader(false); // Hide loader when done
+            searchResultsSection.classList.add('hidden');
+            showLoader(false); // Hide loader on error
         }
     });
+
+    // --- (The rest of the file is unchanged) ---
 
     // Handle Product Click (for recs)
     async function handleProductClick(product) {
@@ -379,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --- Handle Wishlist Click (Feature 2) ---
+    // Handle Wishlist Click
     async function handleWishlistClick(product, button) {
         button.disabled = true;
         try {
@@ -404,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Handle Track Price Click (Feature 3) ---
+    // Handle Track Price Click
     async function handleTrackPriceClick(product, button) {
         button.disabled = true;
         try {
@@ -437,7 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProducts(searchResultsGrid, allProducts, null);
     });
 
-    // --- Add common styles to CSS ---
+    // --- NEW: Add styles for NEW ANIMATED LOADER ---
     const style = document.createElement('style');
     style.innerHTML = `
         .form-input { @apply relative block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:z-10 focus:border-red-500 dark:focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm; }
@@ -453,6 +587,48 @@ document.addEventListener('DOMContentLoaded', () => {
         .placeholder-card { @apply text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm col-span-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 min-h-[150px]; }
         .placeholder-card-small { @apply text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm col-span-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 min-h-[100px]; }
         .loader-small { @apply w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full mb-2 animate-spin-slow; }
+
+        /* --- NEW ANIMATED LOADER --- */
+        .grid-loader-container {
+            @apply col-span-full flex flex-col items-center justify-center min-h-[300px] p-8 overflow-hidden;
+        }
+        .scanner-animation {
+            @apply relative w-48 h-24 flex items-center justify-center;
+        }
+        .scanner-animation .bar {
+            @apply w-1 h-12 bg-gray-300 dark:bg-gray-600 mx-1 rounded-full;
+            animation: scan 1.2s ease-in-out infinite;
+        }
+        .scanner-animation .bar-1 { animation-delay: 0s; }
+        .scanner-animation .bar-2 { animation-delay: 0.1s; }
+        .scanner-animation .bar-3 { animation-delay: 0.2s; }
+        .scanner-animation .bar-4 { animation-delay: 0.3s; }
+        .scanner-animation .bar-5 { animation-delay: 0.4s; }
+        
+        .scanner-animation .ph {
+            @apply absolute left-0 top-1/2 -translate-y-1/2;
+            animation: drive-cart 2.4s ease-in-out infinite;
+        }
+        .scanner-line {
+            @apply absolute left-12 h-16 w-0.5 bg-red-500;
+            animation: scan-line 2.4s ease-in-out infinite;
+        }
+
+        @keyframes scan {
+            0%, 100% { transform: scaleY(0.2); }
+            50% { transform: scaleY(1.0); background-color: #ef4444; } /* red-500 */
+        }
+        @keyframes drive-cart {
+            0%, 100% { transform: translate(-20px, -50%); }
+            40%, 60% { transform: translate(180px, -50%); }
+        }
+        @keyframes scan-line {
+            0%, 100% { transform: translateX(0); opacity: 0; }
+            10% { transform: translateX(0); opacity: 1; }
+            50% { transform: translateX(110px); opacity: 1; }
+            60% { transform: translateX(110px); opacity: 0; }
+        }
+        /* --- END NEW LOADER --- */
     `;
     document.head.appendChild(style);
 });
