@@ -1,38 +1,27 @@
 {% extends "layout.html" %}
-{% block title %}App - SmartCart{% endblock %}
+{% block title %}Home - SmartCart{% endblock %}
 
 {% block content %}
 <div class="h-full flex flex-col">
-    <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-30 border-b border-gray-200 dark:border-gray-700">
+    <!-- Compact Header -->
+    <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm sticky top-0 z-30 border-b border-gray-200 dark:border-gray-700">
         <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0 flex items-center">
-                    <span class="text-2xl font-bold text-red-600">🛍️ SmartCart</span>
-                </div>
-                
-                <div class="flex-1 max-w-xl mx-4">
-                    <form id="search-form">
-                        <label for="search" class="sr-only">Search</label>
-                        <div class="relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="ph ph-magnifying-glass text-gray-400"></i>
-                            </div>
-                            <input type="search" id="search-input" class="relative block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2.5 pl-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:z-10 focus:border-red-500 dark:focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm" placeholder="Search for shoes, shirts, etc..." required>
-                        </div>
-                    </form>
+                    <span class="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">🛍️ SmartCart</span>
                 </div>
                 
                 <div class="flex items-center space-x-4">
-                    <a href="{{ url_for('profile') }}" title="My Profile" class="hidden sm:flex items-center text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-500">
+                    <a href="{{ url_for('profile') }}" title="My Profile" class="hidden sm:flex items-center text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-500 transition-colors">
                         <i class="ph ph-user-circle text-xl mr-1"></i>
                         <span>{{ username }}</span>
                     </a>
-                    <a href="{{ url_for('profile') }}#wishlist" title="My Wishlist" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <a href="{{ url_for('profile') }}#wishlist" title="My Wishlist" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all">
                         <i class="ph ph-heart text-xl"></i>
                     </a>
-                    <button id="theme-toggle" title="Toggle theme" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                        </button>
-                    <a href="{{ url_for('logout') }}" title="Logout" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <button id="theme-toggle" title="Toggle theme" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all">
+                    </button>
+                    <a href="{{ url_for('logout') }}" title="Logout" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all">
                         <i class="ph ph-sign-out text-xl"></i>
                     </a>
                 </div>
@@ -41,7 +30,7 @@
     </header>
     
     <div class="flex-1 flex overflow-hidden">
-        
+        <!-- Filter Sidebar (hidden by default, shown after search) -->
         <aside id="filter-sidebar" class="w-72 bg-white dark:bg-gray-800 p-6 overflow-y-auto border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out hidden flex-shrink-0">
             <h3 class="text-lg font-semibold mb-4">Filters</h3>
             <form id="filter-form">
@@ -55,20 +44,17 @@
 
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
-                    <div id="filter-category-list" class="filter-list max-h-48 overflow-y-auto space-y-2">
-                        </div>
+                    <div id="filter-category-list" class="filter-list max-h-48 overflow-y-auto space-y-2"></div>
                 </div>
 
                 <div class="mb-6">
-                    <label class_name="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Store</label>
-                    <div id="filter-store-list" class="filter-list max-h-40 overflow-y-auto space-y-2">
-                        </div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Store</label>
+                    <div id="filter-store-list" class="filter-list max-h-40 overflow-y-auto space-y-2"></div>
                 </div>
 
                 <div class="mb-6">
-                    <label class_name="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brand</label>
-                    <div id="filter-brand-list" class="filter-list max-h-48 overflow-y-auto space-y-2">
-                        </div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brand</label>
+                    <div id="filter-brand-list" class="filter-list max-h-48 overflow-y-auto space-y-2"></div>
                 </div>
 
                 <div class="space-y-3">
@@ -78,44 +64,220 @@
             </form>
         </aside>
 
-        <main class="flex-1 overflow-y-auto p-8">
-            <div class="max-w-full mx-auto">
-                <div id="app-message" class="text-center p-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                    <i class="ph ph-hand-waving text-5xl text-red-500 mb-4"></i>
-                    <h3 class="text-xl font-semibold">Welcome, {{ username }}!</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mt-2">Start by searching for a product above to find the best deals.</p>
-                </div>
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto">
+            
+            <!-- HOME PAGE CONTENT (shown by default) -->
+            <div id="home-page">
+                <!-- Hero Section -->
+                <section class="relative bg-gradient-to-br from-red-50 via-pink-50 to-orange-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 py-20 px-8 overflow-hidden">
+                    <!-- Animated Background Elements -->
+                    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div class="absolute top-20 left-10 w-72 h-72 bg-red-300/20 rounded-full blur-3xl animate-float"></div>
+                        <div class="absolute bottom-20 right-10 w-96 h-96 bg-pink-300/20 rounded-full blur-3xl animate-float-delayed"></div>
+                    </div>
+                    
+                    <div class="max-w-4xl mx-auto text-center relative z-10">
+                        <h1 class="text-5xl md:text-6xl font-extrabold mb-6 animate-fade-in">
+                            <span class="bg-gradient-to-r from-red-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
+                                Smart Shopping,
+                            </span>
+                            <br>
+                            <span class="text-gray-800 dark:text-white">Smarter Savings</span>
+                        </h1>
+                        <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 animate-fade-in-delayed">
+                            Search across Myntra, Snapdeal & Max Fashion. Get AI-powered recommendations tailored just for you.
+                        </p>
+                        
+                        <!-- Hero Search Bar -->
+                        <form id="hero-search-form" class="max-w-2xl mx-auto animate-fade-in-delayed-more">
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="ph ph-magnifying-glass text-gray-400 text-xl"></i>
+                                </div>
+                                <input 
+                                    type="search" 
+                                    id="hero-search-input" 
+                                    class="hero-search-input block w-full pl-12 pr-32 py-4 text-lg rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:border-red-500 dark:focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition-all shadow-lg group-hover:shadow-xl" 
+                                    placeholder="Search for shoes, shirts, accessories..." 
+                                    required
+                                >
+                                <button 
+                                    type="submit" 
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-2.5 rounded-full font-semibold hover:from-red-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all shadow-md hover:shadow-lg"
+                                >
+                                    Search
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Popular Searches -->
+                        <div class="mt-6 flex flex-wrap justify-center gap-2 animate-fade-in-delayed-most">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Popular:</span>
+                            <button class="quick-search-btn text-sm px-3 py-1 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-all" data-query="sneakers">Sneakers</button>
+                            <button class="quick-search-btn text-sm px-3 py-1 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-all" data-query="t-shirts">T-Shirts</button>
+                            <button class="quick-search-btn text-sm px-3 py-1 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-all" data-query="jeans">Jeans</button>
+                            <button class="quick-search-btn text-sm px-3 py-1 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-all" data-query="dresses">Dresses</button>
+                        </div>
+                    </div>
+                </section>
 
-                <div id="recommendations-section" class="hidden">
-                    <div class="mb-8">
-                        <h2 class="text-2xl font-bold mb-4">You Might Also Like (AI-Powered)</h2>
-                        <div id="ai-recs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div id="ai-recs-placeholder" class="placeholder-card">
-                                <i class="ph ph-brain text-4xl text-gray-400 mb-3"></i>
-                                <p>Your AI recommendations will appear here.</p>
+                <!-- Features Section -->
+                <section class="py-16 px-8 bg-white dark:bg-gray-900">
+                    <div class="max-w-7xl mx-auto">
+                        <h2 class="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Why Choose SmartCart?</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <!-- Feature 1 -->
+                            <div class="feature-card group">
+                                <div class="feature-icon-wrapper bg-red-100 dark:bg-red-900/30">
+                                    <i class="ph ph-shopping-bag text-4xl text-red-600 dark:text-red-400"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold mb-2">Multi-Store Search</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Browse Myntra, Snapdeal, Nike & Max Fashion all at once</p>
+                            </div>
+                            
+                            <!-- Feature 2 -->
+                            <div class="feature-card group">
+                                <div class="feature-icon-wrapper bg-pink-100 dark:bg-pink-900/30">
+                                    <i class="ph ph-brain text-4xl text-pink-600 dark:text-pink-400"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold mb-2">AI Recommendations</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Get personalized suggestions based on your style</p>
+                            </div>
+                            
+                            <!-- Feature 3 -->
+                            <div class="feature-card group">
+                                <div class="feature-icon-wrapper bg-orange-100 dark:bg-orange-900/30">
+                                    <i class="ph ph-tag text-4xl text-orange-600 dark:text-orange-400"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold mb-2">Price Tracking</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Track prices and get notified of deals</p>
+                            </div>
+                            
+                            <!-- Feature 4 -->
+                            <div class="feature-card group">
+                                <div class="feature-icon-wrapper bg-purple-100 dark:bg-purple-900/30">
+                                    <i class="ph ph-heart text-4xl text-purple-600 dark:text-purple-400"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold mb-2">Wishlist</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Save your favorite items for later</p>
                             </div>
                         </div>
                     </div>
-                    <div class="mb-8">
-                        <h2 class="text-2xl font-bold mb-4">Similar Items (Based on Name)</h2>
-                        <div id="similar-recs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div id="similar-recs-placeholder" class="placeholder-card">
-                                <i class="ph ph-mouse-click text-4xl text-gray-400 mb-3"></i>
-                                <p>Similar items will appear here.</p>
+                </section>
+
+                <!-- Quick Stats Section -->
+                 
+                <section class="py-16 px-8 bg-gradient-to-r from-red-600 to-pink-600 text-white">
+                    <div class="max-w-7xl mx-auto">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                            <div class="stat-card">
+                                <i class="ph ph-storefront text-4xl mb-2 opacity-80"></i>
+                                <div class="text-4xl font-bold mb-1">4+</div>
+                                <div class="text-sm opacity-90">Partner Stores</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="ph ph-package text-4xl mb-2 opacity-80"></i>
+                                <div class="text-4xl font-bold mb-1">1000+</div>
+                                <div class="text-sm opacity-90">Products Scanned</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="ph ph-users text-4xl mb-2 opacity-80"></i>
+                                <div class="text-4xl font-bold mb-1">Active</div>
+                                <div class="text-sm opacity-90">Users Online</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="ph ph-percent text-4xl mb-2 opacity-80"></i>
+                                <div class="text-4xl font-bold mb-1">Live</div>
+                                <div class="text-sm opacity-90">Coupon Codes</div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div id="search-results-section" class="hidden">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 id="search-results-title" class="text-2xl font-bold">Search Results</h2>
-                        <span id="search-results-count" class="text-sm font-medium text-gray-500 dark:text-gray-400"></span>
-                    </div>
-                    <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- How It Works Section -->
+                <section class="py-16 px-8 bg-gray-50 dark:bg-gray-800">
+                    <div class="max-w-5xl mx-auto">
+                        <h2 class="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">How It Works</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div class="text-center step-card">
+                                <div class="step-number">1</div>
+                                <i class="ph ph-magnifying-glass text-5xl text-red-600 dark:text-red-400 mb-4"></i>
+                                <h3 class="text-xl font-semibold mb-2">Search</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Enter what you're looking for in the search bar</p>
+                            </div>
+                            <div class="text-center step-card">
+                                <div class="step-number">2</div>
+                                <i class="ph ph-list-checks text-5xl text-pink-600 dark:text-pink-400 mb-4"></i>
+                                <h3 class="text-xl font-semibold mb-2">Compare</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Browse results from multiple stores with filters</p>
+                            </div>
+                            <div class="text-center step-card">
+                                <div class="step-number">3</div>
+                                <i class="ph ph-shopping-cart text-5xl text-orange-600 dark:text-orange-400 mb-4"></i>
+                                <h3 class="text-xl font-semibold mb-2">Shop</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Click to buy from your preferred store</p>
+                            </div>
                         </div>
+                    </div>
+                </section>
+
+                <!-- CTA Section -->
+                <section class="py-20 px-8 bg-white dark:bg-gray-900">
+                    <div class="max-w-4xl mx-auto text-center">
+                        <h2 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">Ready to Start Shopping Smarter?</h2>
+                        <p class="text-xl text-gray-600 dark:text-gray-400 mb-8">Join thousands of smart shoppers finding the best deals</p>
+                        <button id="cta-search-btn" class="cta-button">
+                            <i class="ph ph-rocket-launch mr-2"></i>
+                            Start Searching Now
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- SEARCH RESULTS PAGE (hidden by default, shown after search) -->
+            <div id="search-results-page" class="hidden p-8">
+                <div class="max-w-full mx-auto">
+                    
+                    <!-- Back to Home Button -->
+                    <button id="back-to-home-btn" class="mb-6 flex items-center text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                        <i class="ph ph-arrow-left mr-2"></i>
+                        Back to Home
+                    </button>
+
+                    <!-- Recommendations Section -->
+                    <div id="recommendations-section" class="hidden mb-12">
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold mb-4">You Might Also Like (AI-Powered)</h2>
+                            <div id="ai-recs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div id="ai-recs-placeholder" class="placeholder-card">
+                                    <i class="ph ph-brain text-4xl text-gray-400 mb-3"></i>
+                                    <p>Your AI recommendations will appear here.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold mb-4">Similar Items (Based on Name)</h2>
+                            <div id="similar-recs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div id="similar-recs-placeholder" class="placeholder-card">
+                                    <i class="ph ph-sparkle text-4xl text-gray-400 mb-3"></i>
+                                    <p>Similar items will appear here.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Results Section -->
+                    <div id="search-results-section">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 id="search-results-title" class="text-2xl font-bold">Search Results</h2>
+                            <span id="search-results-count" class="text-sm font-medium text-gray-500 dark:text-gray-400"></span>
+                        </div>
+                        <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                    </div>
                 </div>
             </div>
+            
         </main>
     </div>
 </div>
@@ -129,15 +291,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSearchQuery = '';
     let currentMinPrice = 0;
     let currentMaxPrice = 100000;
-    let pollIntervalId = null; // Store interval ID to clear it
-    let allCoupons = {}; // <--- THIS IS NEW
+    let pollIntervalId = null;
+    let allCoupons = {};
 
     // --- UI Element References ---
-    const searchForm = document.getElementById('search-form');
-    const searchInput = document.getElementById('search-input');
-    const appMessage = document.getElementById('app-message');
-    const filterSidebar = document.getElementById('filter-sidebar');
+    const heroSearchForm = document.getElementById('hero-search-form');
+    const heroSearchInput = document.getElementById('hero-search-input');
+    const quickSearchBtns = document.querySelectorAll('.quick-search-btn');
+    const ctaSearchBtn = document.getElementById('cta-search-btn');
+    const backToHomeBtn = document.getElementById('back-to-home-btn');
     
+    const homePage = document.getElementById('home-page');
+    const searchResultsPage = document.getElementById('search-results-page');
+    
+    const filterSidebar = document.getElementById('filter-sidebar');
     const recommendationsSection = document.getElementById('recommendations-section');
     const aiRecsGrid = document.getElementById('ai-recs-grid');
     const aiRecsPlaceholder = document.getElementById('ai-recs-placeholder');
@@ -158,14 +325,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetFiltersBtn = document.getElementById('reset-filters');
     
     const globalLoader = document.getElementById('global-loader');
-    const loaderText = globalLoader.querySelector('p:first-of-type'); // Get loader text
+    const loaderText = globalLoader.querySelector('p:first-of-type');
     
     const messageBox = document.getElementById('message-box');
     const messageBoxTitle = document.getElementById('message-box-title');
     const messageBoxText = document.getElementById('message-box-text');
     const messageBoxOk = document.getElementById('message-box-ok');
-    
-    // --- NEW: Fetch Coupons on Page Load ---
+
+    // --- Fetch Coupons ---
     async function fetchCoupons() {
         try {
             const response = await fetch('/api/coupons');
@@ -176,29 +343,57 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Could not fetch coupons:", error);
         }
     }
-    fetchCoupons(); // Call it immediately
-    // -------------------------------------
+    fetchCoupons();
+
+    // --- Navigation Functions ---
+    function showHomePage() {
+        homePage.classList.remove('hidden');
+        searchResultsPage.classList.add('hidden');
+        filterSidebar.classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSearchResultsPage() {
+        homePage.classList.add('hidden');
+        searchResultsPage.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- Event Listeners for Navigation ---
+    backToHomeBtn.addEventListener('click', showHomePage);
+    ctaSearchBtn.addEventListener('click', () => {
+        heroSearchInput.focus();
+        heroSearchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    quickSearchBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const query = btn.dataset.query;
+            heroSearchInput.value = query;
+            heroSearchForm.dispatchEvent(new Event('submit'));
+        });
+    });
 
     // --- Utility Functions ---
     const showLoader = (isLoading, text = "Searching stores...") => {
         loaderText.textContent = text;
         globalLoader.classList.toggle('hidden', !isLoading);
     };
+    
     const showMessage = (title, text) => {
         messageBoxTitle.textContent = title;
         messageBoxText.textContent = text;
         messageBox.classList.remove('hidden');
     };
+    
     messageBoxOk.addEventListener('click', () => messageBox.classList.add('hidden'));
 
-    // --- Render Functions ---
-    // --- THIS FUNCTION IS MODIFIED ---
+    // --- Product Card Creation ---
     function createProductCard(product) {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.dataset.product = JSON.stringify(product);
         
-        // --- NEW: Check for coupons ---
         let couponBadge = '';
         if (allCoupons[product.Store] && allCoupons[product.Store].length > 0) {
             const count = allCoupons[product.Store].length;
@@ -208,7 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </button>
             `;
         }
-        // --- END NEW ---
 
         card.innerHTML = `
             <div class="relative">
@@ -219,7 +413,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <img src="${product['Image URL']}" alt="${product['Product Name']}" class="product-image" onerror="this.src='https://placehold.co/400x400/e0e0e0/909090?text=Image+Not+Found'">
             <div class="product-info">
-                ${couponBadge} <h3 class="product-name" title="${product['Product Name']}">${product['Product Name']}</h3>
+                ${couponBadge}
+                <h3 class="product-name" title="${product['Product Name']}">${product['Product Name']}</h3>
                 <p class="product-price">₹${product.Price.toLocaleString('en-IN')}</p>
             </div>
             <div class="space-y-2 mt-2">
@@ -242,48 +437,39 @@ document.addEventListener('DOMContentLoaded', () => {
             handleTrackPriceClick(product, e.currentTarget);
         });
         
-        // --- NEW: Add listener for coupon badge ---
         const badge = card.querySelector('.coupon-badge');
         if (badge) {
             badge.addEventListener('click', (e) => {
-                e.stopPropagation(); // Stop it from firing product click
+                e.stopPropagation();
                 const store = e.currentTarget.dataset.store;
                 const coupons = allCoupons[store];
-                
-                // Show coupons in a simple alert
                 let alertMessage = `Active Coupons for ${store}:\n\n`;
                 coupons.forEach(c => {
                     alertMessage += `• ${c.code}: ${c.description}\n`;
                 });
-                alert(alertMessage); // You can use your showMessage() modal for a prettier look
+                alert(alertMessage);
             });
         }
-        // --- END NEW LISTENER ---
         
         card.addEventListener('click', (e) => {
             if (e.target.tagName !== 'A' && !e.target.closest('button')) {
                 handleProductClick(product);
             }
         });
+        
         return card;
     }
 
-    // --- (The rest of the script is unchanged) ---
-
-    // --- MODIFIED: Checks for the new grid loader and removes it ---
+    // --- Render Functions ---
     function appendProducts(gridElement, products) {
         if (!products || products.length === 0) return;
-        
-        // Check if our new grid loader is present and remove it
         const gridLoader = gridElement.querySelector('.grid-loader-container');
         if (gridLoader) {
-            gridElement.innerHTML = ''; // Nuke the loader
+            gridElement.innerHTML = '';
         }
-
         products.forEach(product => gridElement.appendChild(createProductCard(product)));
     }
 
-    // --- Renders a full list (e.g., for filters or cache hits) ---
     function renderProducts(gridElement, products, placeholderElement) {
         gridElement.innerHTML = '';
         if (!products || products.length === 0) {
@@ -300,13 +486,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
+
     // --- Filter Functions ---
     function populateFilters(filters) {
-        if (!filters) {
-            console.warn("No filter data received.");
-            return;
-        }
+        if (!filters) return;
 
         currentMinPrice = filters.minPrice;
         currentMaxPrice = filters.maxPrice;
@@ -342,7 +525,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function applyFilters() {
-        // ... (This function is unchanged)
         const minPrice = parseInt(filterMinPrice.value) || currentMinPrice;
         const maxPrice = parseInt(filterMaxPrice.value) || currentMaxPrice;
         
@@ -364,16 +546,14 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProducts(searchResultsGrid, filteredProducts, null);
     }
 
-    // --- Event Handlers ---
-
-    // --- pollForResult (Unchanged from last version) ---
+    // --- Polling Function ---
     function pollForResult(taskId, query) {
         if (pollIntervalId) {
-            clearInterval(pollIntervalId); // Clear any existing poll
+            clearInterval(pollIntervalId);
         }
 
         let pollCount = 0;
-        const maxPolls = 30; // Stop after 1.5 minutes (30 * 3s)
+        const maxPolls = 30;
         
         pollIntervalId = setInterval(async () => {
             if (pollCount > maxPolls) {
@@ -394,7 +574,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const data = await response.json();
                 
-                // --- 1. Handle new products (if any) ---
                 if (data.new_products && data.new_products.length > 0) {
                     console.log(`Received ${data.new_products.length} new products.`);
                     appendProducts(searchResultsGrid, data.new_products);
@@ -402,18 +581,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     searchResultsCount.textContent = `${allProducts.length} products found so far...`;
                 }
                 
-                // --- 2. Check for final state ---
                 if (data.status === 'SUCCESS') {
                     console.log('Search SUCCESS, all data received.');
                     clearInterval(pollIntervalId);
                     
-                    // Set final data
                     allProducts = data.products;
-                    // Only re-render if no products were found (to clear "No valid products" error)
                     if (allProducts.length === 0) {
                          renderProducts(searchResultsGrid, [], null);
                     } else {
-                        // Otherwise, just update filters and count
                          populateFilters(data.filters);
                          searchResultsCount.textContent = `${allProducts.length} products found.`;
                     }
@@ -425,7 +600,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 } else if (data.status === 'PENDING') {
                     console.log('Search PENDING... more scrapers running.');
-                    // Keep the last "xx products found so far..." message
                 
                 } else {
                     clearInterval(pollIntervalId);
@@ -436,24 +610,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 showMessage('Search Error', error.message);
                 searchResultsCount.textContent = `Search Error: ${error.message}`;
             }
-        }, 3000); // Poll every 3 seconds
+        }, 3000);
     }
-    
-    // --- MODIFIED: Handle Search to add NEW animated loader ---
-    searchForm.addEventListener('submit', async (e) => {
+
+    // --- Handle Search Form Submit ---
+    heroSearchForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const query = searchInput.value.trim();
+        const query = heroSearchInput.value.trim();
         if (!query) return;
 
         currentSearchQuery = query;
-        showLoader(true, "Dispatching scrapers..."); // Show loader *briefly*
-        appMessage.classList.add('hidden');
-        filterSidebar.classList.add('hidden'); // Hide until we have filters
+        showLoader(true, "Dispatching scrapers...");
         
-        // Clear all old results
+        // Switch to search results page
+        showSearchResultsPage();
+        
+        filterSidebar.classList.add('hidden');
         allProducts = [];
         
-        // --- NEW: Inject Animated Loader ---
         searchResultsGrid.innerHTML = `
             <div class="grid-loader-container">
                 <div class="scanner-animation">
@@ -470,11 +644,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 </p>
             </div>
         `;
-        // --- END NEW ---
 
         searchResultsCount.textContent = 'Searching...';
-        searchResultsTitle.textContent = `Results for "${query}"`; // Set title immediately
-        searchResultsSection.classList.remove('hidden'); // Show the (empty) results section
+        searchResultsTitle.textContent = `Results for "${query}"`;
         
         recommendationsSection.classList.add('hidden');
         renderProducts(aiRecsGrid, [], aiRecsPlaceholder);
@@ -491,20 +663,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (data.status === 'SUCCESS') {
-                // This was a CACHE HIT. Render immediately.
                 console.log('Cache hit!');
                 showLoader(false);
                 
                 allProducts = data.products;
-                renderProducts(searchResultsGrid, allProducts, null); // This clears loader
+                renderProducts(searchResultsGrid, allProducts, null);
                 populateFilters(data.filters);
                 recommendationsSection.classList.remove('hidden');
                 searchResultsCount.textContent = `${allProducts.length} products found.`;
                 
             } else if (data.status === 'PENDING') {
-                // This was a CACHE MISS. Start polling.
                 console.log('Cache miss, starting poll...');
-                showLoader(false); 
+                showLoader(false);
                 searchResultsCount.textContent = "Searching stores... 0 products found.";
                 pollForResult(data.task_id, query);
             }
@@ -512,19 +682,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Search error:', error);
             showMessage('Search Error', error.message);
-            appMessage.classList.remove('hidden');
-            searchResultsSection.classList.add('hidden');
-            showLoader(false); // Hide loader on error
+            showLoader(false);
         }
     });
 
-    // --- (The rest of the file is unchanged) ---
-
-    // Handle Product Click (for recs)
+    // --- Handle Product Click ---
     async function handleProductClick(product) {
         if (!product) return;
         
-        // Show small loaders in the recommendation panels
         similarRecsGrid.innerHTML = `<div class="placeholder-card-small"><div class="loader-small"></div><p>Loading...</p></div>`;
         aiRecsGrid.innerHTML = `<div class="placeholder-card-small"><div class="loader-small"></div><p>Warming up AI...</p></div>`;
         
@@ -544,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Handle Wishlist Click
+    // --- Handle Wishlist Click ---
     async function handleWishlistClick(product, button) {
         button.disabled = true;
         try {
@@ -569,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Handle Track Price Click
+    // --- Handle Track Price Click ---
     async function handleTrackPriceClick(product, button) {
         button.disabled = true;
         try {
@@ -589,7 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Handle Filter Form
+    // --- Handle Filter Form ---
     filterForm.addEventListener('submit', (e) => {
         e.preventDefault();
         applyFilters();
@@ -602,9 +767,68 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProducts(searchResultsGrid, allProducts, null);
     });
 
-    // --- NEW: Add styles for NEW ANIMATED LOADER ---
+    // --- Add Custom Styles ---
     const style = document.createElement('style');
     style.innerHTML = `
+        /* Animation Keyframes */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes float-delayed {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-30px); }
+        }
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; }
+        .animate-fade-in { animation: fade-in 0.6s ease-out; }
+        .animate-fade-in-delayed { animation: fade-in 0.8s ease-out; }
+        .animate-fade-in-delayed-more { animation: fade-in 1s ease-out; }
+        .animate-fade-in-delayed-most { animation: fade-in 1.2s ease-out; }
+        
+        /* Hero Search Input */
+        .hero-search-input:focus {
+            transform: translateY(-2px);
+        }
+        
+        /* Feature Cards */
+        .feature-card {
+            @apply bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300;
+        }
+        .feature-card:hover {
+            @apply shadow-lg -translate-y-2 border-red-300 dark:border-red-500;
+        }
+        .feature-icon-wrapper {
+            @apply w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform duration-300;
+        }
+        .feature-card:hover .feature-icon-wrapper {
+            @apply scale-110;
+        }
+        
+        /* Step Cards */
+        .step-card {
+            @apply relative;
+        }
+        .step-number {
+            @apply absolute -top-4 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-red-600 to-pink-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg;
+        }
+        
+        /* CTA Button */
+        .cta-button {
+            @apply inline-flex items-center bg-gradient-to-r from-red-600 to-pink-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-red-700 hover:to-pink-700 focus:outline-none focus:ring-4 focus:ring-red-500/50 transition-all shadow-lg hover:shadow-xl hover:scale-105;
+        }
+        
+        /* Stat Cards */
+        .stat-card {
+            @apply transition-transform duration-300 hover:scale-110;
+        }
+        
+        /* Existing styles */
         .form-input { @apply relative block w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:z-10 focus:border-red-500 dark:focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm; }
         .form-checkbox { @apply h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-red-600 focus:ring-red-500; }
         .btn-primary { @apply w-full flex justify-center rounded-md border border-transparent bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:ring-offset-gray-800; }
@@ -617,18 +841,12 @@ document.addEventListener('DOMContentLoaded', () => {
         .product-store { @apply text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full px-2.5 py-1 self-start mb-2; }
         .placeholder-card { @apply text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm col-span-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 min-h-[150px]; }
         .placeholder-card-small { @apply text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm col-span-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 min-h-[100px]; }
-        .loader-small { @apply w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full mb-2 animate-spin-slow; }
-
-        /* --- NEW COUPON BADGE STYLE --- */
+        .loader-small { @apply w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full mb-2 animate-spin; }
         .coupon-badge {
             @apply inline-flex items-center gap-1 bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 text-xs font-semibold px-2 py-0.5 rounded-full mb-2 transition-all hover:bg-green-200 dark:hover:bg-green-700;
         }
-        .coupon-badge i {
-            @apply text-sm;
-        }
-        /* --- END NEW STYLE --- */
-
-        /* --- NEW ANIMATED LOADER --- */
+        
+        /* Grid Loader Animation */
         .grid-loader-container {
             @apply col-span-full flex flex-col items-center justify-center min-h-[300px] p-8 overflow-hidden;
         }
@@ -656,7 +874,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         @keyframes scan {
             0%, 100% { transform: scaleY(0.2); }
-            50% { transform: scaleY(1.0); background-color: #ef4444; } /* red-500 */
+            50% { transform: scaleY(1.0); background-color: #ef4444; }
         }
         @keyframes drive-cart {
             0%, 100% { transform: translate(-20px, -50%); }
@@ -668,7 +886,6 @@ document.addEventListener('DOMContentLoaded', () => {
             50% { transform: translateX(110px); opacity: 1; }
             60% { transform: translateX(110px); opacity: 0; }
         }
-        /* --- END NEW LOADER --- */
     `;
     document.head.appendChild(style);
 });
