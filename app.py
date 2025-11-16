@@ -47,11 +47,11 @@ def run_coupon_scraper_loop():
     """
     This function runs in a separate thread and periodically scrapes for coupons.
     """
-    print("Starting background coupon scraper thread...")
+    #rint("Starting background coupon scraper thread...")
     # Run once on startup, then loop
     while True:
         try:
-            print("THREAD: Running nightly coupon check...")
+        #   print("THREAD: Running nightly coupon check...")
             
             # 1. Scrape for coupons (these are the simulated functions)
             all_coupons = []
@@ -64,13 +64,13 @@ def run_coupon_scraper_loop():
             for coupon in all_coupons:
                db_models.add_coupon(coupon['store'], coupon['code'], coupon['description'])
             
-            print("THREAD: Coupon check complete. Sleeping for 4 hours.")
+          # print("THREAD: Coupon check complete. Sleeping for 4 hours.")
             
             # Sleep for 4 hours (4 * 60 * 60 seconds)
             time.sleep(4 * 3600) 
 
         except Exception as e:
-            print(f"THREAD: Error in coupon scraper loop: {e}. Retrying in 1 hour.")
+        #   print(f"THREAD: Error in coupon scraper loop: {e}. Retrying in 1 hour.")
             time.sleep(3600) # Wait an hour if something breaks
 
 # --- 2. MODIFIED: Global Caches & Threading ---
@@ -324,7 +324,7 @@ def api_search():
     # The executor will run them based on max_workers (e.g., 2 at a time)
     executor.submit(run_one_scraper, task_id, "Myntra", scrape_myntra, query)
     executor.submit(run_one_scraper, task_id, "Snapdeal", scrape_snapdeal, query)
-   # executor.submit(run_one_scraper, task_id, "Nike", scrape_nike, query)
+    executor.submit(run_one_scraper, task_id, "Nike", scrape_nike, query)
     executor.submit(run_one_scraper, task_id, "MaxFashion", scrape_max_fashion, query)
     
     # Immediately return the task ID

@@ -8,7 +8,7 @@ import pprint
 
 def scrape_myntra_coupons(headless=True):
     """Simulates scraping coupons for Myntra."""
-    print("THREAD: Simulating Myntra coupon scrape...")
+    #print("THREAD: Simulating Myntra coupon scrape...")
     time.sleep(1) # Simulate network delay
     return [
         {"store": "Myntra", "code": "MYNTRA20", "description": "Flat 20% Off On First Order"},
@@ -17,7 +17,7 @@ def scrape_myntra_coupons(headless=True):
 
 def scrape_nike_coupons(headless=True):
     """Simulates scraping coupons for Nike."""
-    print("THREAD: Simulating Nike coupon scrape...")
+    #print("THREAD: Simulating Nike coupon scrape...")
     time.sleep(1)
     return [
         {"store": "Nike", "code": "JUSTDOIT", "description": "15% Off Running Shoes"},
@@ -34,7 +34,7 @@ def scrape_snapdeal_coupons(headless=True):
 
 def scrape_max_fashion_coupons(headless=True):
     """Simulates scraping coupons for Max Fashion."""
-    print("THREAD: Simulating Max Fashion scrape...")
+    #print("THREAD: Simulating Max Fashion scrape...")
     time.sleep(1)
     return [
         {"store": "Max Fashion", "code": "MAXSTYLE", "description": "Buy 1 Get 1 Free on T-Shirts"}
@@ -42,10 +42,10 @@ def scrape_max_fashion_coupons(headless=True):
 
 # --- Test Block ---
 if __name__ == "__main__":
-    print("--- STARTING SCRAPER TEST (SIMULATION) ---")
+   # print("--- STARTING SCRAPER TEST (SIMULATION) ---")
     
     coupons = scrape_myntra_coupons() 
     
-    print("\n--- RESULTS ---")
+   # print("\n--- RESULTS ---")
     pprint.pprint(coupons)
-    print("--- TEST COMPLETE ---")
+   # print("--- TEST COMPLETE ---")
