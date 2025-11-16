@@ -393,7 +393,6 @@ def api_search_status(task_id):
             "new_products": new_products_to_send
         })
 
-# --- Original /api/recommend (Unchanged) ---
 @app.route("/api/recommend")
 def api_recommend():
     if "user_id" not in session:
@@ -406,31 +405,44 @@ def api_recommend():
     db_models.log_click(session["user_id"], product_name)
     
     try:
-        # Read the DataFrame from our new server-side cache
         df = product_cache[session['user_id']]
     except KeyError:
         return jsonify({"error": "No search data found. Please search first."}), 400
-        
-    # 1. Get Content-Based
-    rec_names_df = get_recommendations(product_name, df)
-    rec_products = [] if rec_names_df.empty else rec_names_df.to_dict(orient='records')
-
-    # 2. Get AI-Based (DL)
-    dl_products = []
-    query = session.get('last_query', 'default')
     
+    # --- NEW: Combined Recommendation Logic ---
+    
+    final_recs_list = []
+    seen_urls = set()
+
+    # 1. Get AI-Based (DL)
+    query = session.get('last_query', 'default')
     if query in model_cache:
-        model, tokenizer, max_length = model_cache[query]
+        model, product_to_id, max_length = model_cache[query]
         if model:
-            dl_names_df = get_dl_recommendation_from_trained_model(product_name, df, model, tokenizer, max_length)
+            dl_names_df = get_dl_recommendation_from_trained_model(product_name, df, model, product_to_id, max_length)
             if not dl_names_df.empty:
-                dl_products = dl_names_df.to_dict(orient='records')
+                # Add AI recs to the final list first
+                for rec in dl_names_df.to_dict(orient='records'):
+                    if rec['Product URL'] not in seen_urls:
+                        final_recs_list.append(rec)
+                        seen_urls.add(rec['Product URL'])
 
+    # 2. Get Content-Based (Similar Name)
+    rec_names_df = get_recommendations(product_name, df)
+    if not rec_names_df.empty:
+        # Add similar recs if they aren't already in the list
+        for rec in rec_names_df.to_dict(orient='records'):
+            if rec['Product URL'] not in seen_urls:
+                final_recs_list.append(rec)
+                seen_urls.add(rec['Product URL'])
+
+    # Return a single combined list
+    # We use the 'ai_powered' key so you don't have to change your frontend
     return jsonify({
-        "similar": rec_products,
-        "ai_powered": dl_products
+        "similar": [], # Send empty 'similar'
+        "ai_powered": final_recs_list
     })
-
+    
 # --- Feature 2 & 3: Wishlist & Price Track API (Unchanged) ---
 @app.route("/api/wishlist/add", methods=["POST"])
 def api_add_to_wishlist():

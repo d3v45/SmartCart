@@ -1,15 +1,17 @@
 {
-    // Ignore unknown at-rules (e.g. @tailwind, @apply) so built-in CSS validator
-    // doesn't flag Tailwind directives as warnings.
+    // Ignore unknown at-rules (e.g. @tailwind, @apply)
     "css.lint.unknownAtRules": "ignore",
     "scss.lint.unknownAtRules": "ignore",
     "less.lint.unknownAtRules": "ignore",
 
-    // Let the Tailwind extension handle Tailwind-specific completions and validation.
-    // Optionally map filetypes if needed; keep default for now.
+    // Tailwind extension settings
     "tailwindCSS.includeLanguages": {
         "css": "css",
         "html": "html",
         "javascript": "javascript"
-    }
+    },
+
+    // --- ADD THIS LINE ---
+    // This tells VS Code exactly which Python to use
+    "python.defaultInterpreterPath": "D:/Deep Learning/Project/smartcart_pro/.venv/Scripts/python.exe"
 }
