@@ -90,7 +90,7 @@ task_cache = {}
 task_cache_lock = threading.Lock()
 
 # --- MODIFIED: Use 2 workers to prevent memory crashes but still get some parallelism ---
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 # -----------------------------------------------
 
 # --- Smart Category Filtering (Unchanged) ---
@@ -166,7 +166,7 @@ def profile():
     user_id = session['user_id']
     wishlist = db_models.get_wishlist(user_id)
     tracked_items = db_models.get_tracked_items(user_id)
-    history = db_models.get_click_history(user_id, limit=20)
+    history = db_models.get_click_history(user_id, limit=100)
     
     return render_template("profile.html", 
                            username=session.get("username"),
@@ -324,7 +324,7 @@ def api_search():
     # The executor will run them based on max_workers (e.g., 2 at a time)
     executor.submit(run_one_scraper, task_id, "Myntra", scrape_myntra, query)
     executor.submit(run_one_scraper, task_id, "Snapdeal", scrape_snapdeal, query)
-    executor.submit(run_one_scraper, task_id, "Nike", scrape_nike, query)
+   # executor.submit(run_one_scraper, task_id, "Nike", scrape_nike, query)
     executor.submit(run_one_scraper, task_id, "MaxFashion", scrape_max_fashion, query)
     
     # Immediately return the task ID
