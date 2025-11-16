@@ -4,12 +4,21 @@ from flask_session import Session
 import pandas as pd
 import numpy as np
 import atexit
+import time  # <--- ADD THIS
 
 # --- 1. NEW IMPORTS for Asynchronous Tasks (No Celery/Redis) ---
 import concurrent.futures
 import threading
 import uuid
 # -------------------------------------------------------------
+
+# --- NEW: Import your coupon scrapers ---
+from coupon_scrapers import (
+    scrape_myntra_coupons, 
+    scrape_snapdeal_coupons, 
+    scrape_nike_coupons, 
+    scrape_max_fashion_coupons
+)
 
 # --- Your Project's Code ---
 # We still use db_models for our database logic
@@ -29,6 +38,40 @@ Session(app)
 
 # Ensure all new tables are created on startup
 db_models.create_tables()
+
+# ... (after db_models.create_tables())
+
+# --- NEW: Background Thread Function ---
+
+def run_coupon_scraper_loop():
+    """
+    This function runs in a separate thread and periodically scrapes for coupons.
+    """
+    print("Starting background coupon scraper thread...")
+    # Run once on startup, then loop
+    while True:
+        try:
+            print("THREAD: Running nightly coupon check...")
+            
+            # 1. Scrape for coupons (these are the simulated functions)
+            all_coupons = []
+            all_coupons.extend(scrape_myntra_coupons())
+            all_coupons.extend(scrape_snapdeal_coupons())
+            all_coupons.extend(scrape_nike_coupons())
+            all_coupons.extend(scrape_max_fashion_coupons())
+
+            # 2. Add them to the database
+            for coupon in all_coupons:
+               db_models.add_coupon(coupon['store'], coupon['code'], coupon['description'])
+            
+            print("THREAD: Coupon check complete. Sleeping for 4 hours.")
+            
+            # Sleep for 4 hours (4 * 60 * 60 seconds)
+            time.sleep(4 * 3600) 
+
+        except Exception as e:
+            print(f"THREAD: Error in coupon scraper loop: {e}. Retrying in 1 hour.")
+            time.sleep(3600) # Wait an hour if something breaks
 
 # --- 2. MODIFIED: Global Caches & Threading ---
 
@@ -417,6 +460,27 @@ def api_track_price():
     db_models.log_price(product)
     return jsonify({"success": True, "message": "Price tracking enabled."})
 
-# --- Run the App (Unchanged) ---
+# --- NEW: API Endpoint for Coupons ---
+
+@app.route("/api/coupons")
+def api_get_coupons():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    coupons = db_models.get_all_coupons()
+    return jsonify(coupons)
+
+
+# ... (after the new @app.route("/api/coupons") function)
+
+# --- NEW: Start the background thread ---
+# We set daemon=True so the thread automatically exits when the main app stops
+coupon_thread = threading.Thread(target=run_coupon_scraper_loop, daemon=True)
+coupon_thread.start()
+# ------------------------------------
+
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
+
+    
+    

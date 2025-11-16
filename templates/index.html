@@ -3,16 +3,13 @@
 
 {% block content %}
 <div class="h-full flex flex-col">
-    <!-- Header -->
     <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-30 border-b border-gray-200 dark:border-gray-700">
         <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
                     <span class="text-2xl font-bold text-red-600">🛍️ SmartCart</span>
                 </div>
                 
-                <!-- Search Bar -->
                 <div class="flex-1 max-w-xl mx-4">
                     <form id="search-form">
                         <label for="search" class="sr-only">Search</label>
@@ -25,7 +22,6 @@
                     </form>
                 </div>
                 
-                <!-- User Info & Actions -->
                 <div class="flex items-center space-x-4">
                     <a href="{{ url_for('profile') }}" title="My Profile" class="hidden sm:flex items-center text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-500">
                         <i class="ph ph-user-circle text-xl mr-1"></i>
@@ -35,8 +31,7 @@
                         <i class="ph ph-heart text-xl"></i>
                     </a>
                     <button id="theme-toggle" title="Toggle theme" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                        <!-- Icon injected by JS -->
-                    </button>
+                        </button>
                     <a href="{{ url_for('logout') }}" title="Logout" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <i class="ph ph-sign-out text-xl"></i>
                     </a>
@@ -45,14 +40,11 @@
         </div>
     </header>
     
-    <!-- Main Content Area -->
     <div class="flex-1 flex overflow-hidden">
         
-        <!-- Filter Sidebar -->
         <aside id="filter-sidebar" class="w-72 bg-white dark:bg-gray-800 p-6 overflow-y-auto border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out hidden flex-shrink-0">
             <h3 class="text-lg font-semibold mb-4">Filters</h3>
             <form id="filter-form">
-                <!-- Price Filter -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Price Range</label>
                     <div class="flex space-x-2">
@@ -61,28 +53,22 @@
                     </div>
                 </div>
 
-                <!-- Category Filter -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
                     <div id="filter-category-list" class="filter-list max-h-48 overflow-y-auto space-y-2">
-                        <!-- Categories populated by JS -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- Store Filter -->
                 <div class="mb-6">
                     <label class_name="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Store</label>
                     <div id="filter-store-list" class="filter-list max-h-40 overflow-y-auto space-y-2">
-                        <!-- Stores populated by JS -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- Brand Filter -->
                 <div class="mb-6">
                     <label class_name="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brand</label>
                     <div id="filter-brand-list" class="filter-list max-h-48 overflow-y-auto space-y-2">
-                        <!-- Brands populated by JS -->
-                    </div>
+                        </div>
                 </div>
 
                 <div class="space-y-3">
@@ -92,7 +78,6 @@
             </form>
         </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 overflow-y-auto p-8">
             <div class="max-w-full mx-auto">
                 <div id="app-message" class="text-center p-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
@@ -128,8 +113,7 @@
                         <span id="search-results-count" class="text-sm font-medium text-gray-500 dark:text-gray-400"></span>
                     </div>
                     <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        <!-- Product cards will be injected here by JavaScript -->
-                    </div>
+                        </div>
                 </div>
             </div>
         </main>
@@ -138,7 +122,6 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Custom JavaScript for dynamic behavior -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // --- State ---
@@ -147,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentMinPrice = 0;
     let currentMaxPrice = 100000;
     let pollIntervalId = null; // Store interval ID to clear it
+    let allCoupons = {}; // <--- THIS IS NEW
 
     // --- UI Element References ---
     const searchForm = document.getElementById('search-form');
@@ -181,6 +165,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageBoxText = document.getElementById('message-box-text');
     const messageBoxOk = document.getElementById('message-box-ok');
     
+    // --- NEW: Fetch Coupons on Page Load ---
+    async function fetchCoupons() {
+        try {
+            const response = await fetch('/api/coupons');
+            if (!response.ok) return;
+            allCoupons = await response.json();
+            console.log("Coupons loaded:", allCoupons);
+        } catch (error) {
+            console.error("Could not fetch coupons:", error);
+        }
+    }
+    fetchCoupons(); // Call it immediately
+    // -------------------------------------
+
     // --- Utility Functions ---
     const showLoader = (isLoading, text = "Searching stores...") => {
         loaderText.textContent = text;
@@ -194,11 +192,24 @@ document.addEventListener('DOMContentLoaded', () => {
     messageBoxOk.addEventListener('click', () => messageBox.classList.add('hidden'));
 
     // --- Render Functions ---
+    // --- THIS FUNCTION IS MODIFIED ---
     function createProductCard(product) {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.dataset.product = JSON.stringify(product);
         
+        // --- NEW: Check for coupons ---
+        let couponBadge = '';
+        if (allCoupons[product.Store] && allCoupons[product.Store].length > 0) {
+            const count = allCoupons[product.Store].length;
+            couponBadge = `
+                <button title="View Coupons" class="coupon-badge" data-store="${product.Store}">
+                    <i class="ph ph-tag-fill"></i> ${count} Coupon${count > 1 ? 's' : ''}
+                </button>
+            `;
+        }
+        // --- END NEW ---
+
         card.innerHTML = `
             <div class="relative">
                 <span class="product-store">${product.Store}</span>
@@ -208,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <img src="${product['Image URL']}" alt="${product['Product Name']}" class="product-image" onerror="this.src='https://placehold.co/400x400/e0e0e0/909090?text=Image+Not+Found'">
             <div class="product-info">
-                <h3 class="product-name" title="${product['Product Name']}">${product['Product Name']}</h3>
+                ${couponBadge} <h3 class="product-name" title="${product['Product Name']}">${product['Product Name']}</h3>
                 <p class="product-price">₹${product.Price.toLocaleString('en-IN')}</p>
             </div>
             <div class="space-y-2 mt-2">
@@ -231,6 +242,24 @@ document.addEventListener('DOMContentLoaded', () => {
             handleTrackPriceClick(product, e.currentTarget);
         });
         
+        // --- NEW: Add listener for coupon badge ---
+        const badge = card.querySelector('.coupon-badge');
+        if (badge) {
+            badge.addEventListener('click', (e) => {
+                e.stopPropagation(); // Stop it from firing product click
+                const store = e.currentTarget.dataset.store;
+                const coupons = allCoupons[store];
+                
+                // Show coupons in a simple alert
+                let alertMessage = `Active Coupons for ${store}:\n\n`;
+                coupons.forEach(c => {
+                    alertMessage += `• ${c.code}: ${c.description}\n`;
+                });
+                alert(alertMessage); // You can use your showMessage() modal for a prettier look
+            });
+        }
+        // --- END NEW LISTENER ---
+        
         card.addEventListener('click', (e) => {
             if (e.target.tagName !== 'A' && !e.target.closest('button')) {
                 handleProductClick(product);
@@ -238,6 +267,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         return card;
     }
+
+    // --- (The rest of the script is unchanged) ---
 
     // --- MODIFIED: Checks for the new grid loader and removes it ---
     function appendProducts(gridElement, products) {
@@ -587,6 +618,15 @@ document.addEventListener('DOMContentLoaded', () => {
         .placeholder-card { @apply text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm col-span-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 min-h-[150px]; }
         .placeholder-card-small { @apply text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm col-span-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 min-h-[100px]; }
         .loader-small { @apply w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full mb-2 animate-spin-slow; }
+
+        /* --- NEW COUPON BADGE STYLE --- */
+        .coupon-badge {
+            @apply inline-flex items-center gap-1 bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 text-xs font-semibold px-2 py-0.5 rounded-full mb-2 transition-all hover:bg-green-200 dark:hover:bg-green-700;
+        }
+        .coupon-badge i {
+            @apply text-sm;
+        }
+        /* --- END NEW STYLE --- */
 
         /* --- NEW ANIMATED LOADER --- */
         .grid-loader-container {

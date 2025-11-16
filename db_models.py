@@ -69,6 +69,22 @@ def create_tables():
     )
     ''')
     
+    
+    # ... (after price_history table)
+    
+    # --- NEW: Coupon Table ---
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS coupons (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        store TEXT NOT NULL,
+        code TEXT NOT NULL,
+        description TEXT,
+        last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(store, code)
+    )
+    ''')
+    
+
     conn.commit()
     conn.close()
 
@@ -234,6 +250,55 @@ def get_tracked_items(user_id):
     except sqlite3.Error as e:
         print(f"Database error (get_tracked_items): {e}")
         return []
+    finally:
+        if conn:
+            conn.close()
+            
+            # --- NEW: Coupon Functions ---
+
+def add_coupon(store, code, description):
+    """Adds a new coupon, or updates 'last_updated' if it exists."""
+    try:
+        conn = sqlite3.connect('user_history.db', check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO coupons (store, code, description, last_updated) 
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(store, code) DO UPDATE SET 
+            last_updated=excluded.last_updated, description=excluded.description
+            """,
+            (store, code, description, datetime.now())
+        )
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Database error (add_coupon): {e}")
+    finally:
+        if conn:
+            conn.close()
+
+def get_all_coupons():
+    """Retrieves all active coupons, grouped by store."""
+    try:
+        conn = sqlite3.connect('user_history.db', check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        # Get all coupons, most recent first
+        cursor.execute("SELECT * FROM coupons ORDER BY store, last_updated DESC")
+        
+        # Group them by store
+        coupons_by_store = {}
+        for row in cursor.fetchall():
+            item = dict(row)
+            store = item['store']
+            if store not in coupons_by_store:
+                coupons_by_store[store] = []
+            coupons_by_store[store].append(item)
+            
+        return coupons_by_store
+    except sqlite3.Error as e:
+        print(f"Database error (get_all_coupons): {e}")
+        return {}
     finally:
         if conn:
             conn.close()
