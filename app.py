@@ -409,7 +409,7 @@ def api_recommend():
     except KeyError:
         return jsonify({"error": "No search data found. Please search first."}), 400
     
-    # --- NEW: Combined Recommendation Logic ---
+    # --- Combined Recommendation Logic ---
     
     final_recs_list = []
     seen_urls = set()
@@ -421,25 +421,30 @@ def api_recommend():
         if model:
             dl_names_df = get_dl_recommendation_from_trained_model(product_name, df, model, product_to_id, max_length)
             if not dl_names_df.empty:
-                # Add AI recs to the final list first
                 for rec in dl_names_df.to_dict(orient='records'):
                     if rec['Product URL'] not in seen_urls:
+                        
+                        # --- THIS IS THE NEW LINE ---
+                        rec['rec_type'] = 'ai' # Tag as AI
+                        
                         final_recs_list.append(rec)
                         seen_urls.add(rec['Product URL'])
 
     # 2. Get Content-Based (Similar Name)
     rec_names_df = get_recommendations(product_name, df)
     if not rec_names_df.empty:
-        # Add similar recs if they aren't already in the list
         for rec in rec_names_df.to_dict(orient='records'):
             if rec['Product URL'] not in seen_urls:
+                
+                # --- THIS IS THE NEW LINE ---
+                rec['rec_type'] = 'name' # Tag as Name-Based
+                
                 final_recs_list.append(rec)
                 seen_urls.add(rec['Product URL'])
 
     # Return a single combined list
-    # We use the 'ai_powered' key so you don't have to change your frontend
     return jsonify({
-        "similar": [], # Send empty 'similar'
+        "similar": [], 
         "ai_powered": final_recs_list
     })
     
